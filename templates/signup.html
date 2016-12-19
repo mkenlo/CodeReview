@@ -1,0 +1,128 @@
+{% extends "base.html" %} 
+
+{% block content %}
+		<div class="row">
+			<br><br>
+			<div id="result" class="col-md-4">	</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<h2>Sign up here</h2>
+				<form method="POST" action="{{url_for('signUp')}}">
+				<div class="form-group">
+				    <label for="inputEmail">Username</label>
+				    <input type="name" name="username" class="form-control"  placeholder="Username">
+				  </div>
+				  <div class="form-group">
+				    <label for="inputEmail">Email address</label>
+				    <input type="email" name="email" class="form-control" id="inputEmail" placeholder="Email">
+				  </div>
+				  <div class="form-group">
+				    <label for="inputPassword">Password</label>
+				    <input type="password" name="passwd" class="form-control" id="inputPassword" placeholder="Password">
+				  </div>
+				  <div class="form-group">
+				    <label for="inputPassword">Re-enter Password</label>
+				    <input type="password" name="verif_passwd" class="form-control" id="verifInputPassword" placeholder="Confirm password">
+				  </div>
+				  
+				  <button type="submit" class="btn btn-default">Sign me up</button>
+				</form>
+			</div>
+				<div id="signinButton" class="col-md-4">
+				<h2>Sign up with Google</h2>
+				<br>
+				<div class="g-signin2" data-onsuccess="gSignInCallback"
+					data-scope="openid email"
+		            data-clientid="99393343552-3hmud19ig349jqjs2peq7biv918qi9m0.apps.googleusercontent.com"
+		            data-redirecturi="postmessage"
+		            data-accesstype="offline"
+		            data-cookiepolicy="single_host_origin"
+		            data-callback="signInCallback"
+		            data-approvalprompt="force">
+
+				</div>
+				<br>
+				<h2>Sign in with Facebook</h2>
+				<div class="fb-login-button" onlogin="fbSignInCallback();"
+					data-max-rows="1" 
+					data-size="large" 
+					data-show-faces="false"
+					data-auto-logout-link="true"
+					data-scope="public_profile, email"
+				></div>
+		</div>
+		
+<script>
+
+	function gSignInCallback(authResult){
+	 
+		if(authResult['code']){
+			
+			$.ajax({
+				type:'POST',
+				url:'/gconnect?state={{STATE}}',
+				processData:false,
+				contentType:'application/octet-stream;charset=utf-8',
+				data: authResult['code'],
+				error: function(result){
+					$('#result').addClass('alert alert-danger');
+					$('#result').append("<h1>Ooops!! Sign in Failed</h1>"); 
+					$('#result').append("<ul><li>error : "+ result.status+"</li>"+
+						"<li>message : "+ result.responseText+"</li></ul></span>");
+					console.log(result);
+				},
+				success: function(result){
+					$('#signinButton').attr('style', 'display:none');
+					$('#result').addClass("alert alert-success");
+					$('#result').append(result);
+					$('#result').append("redirecting...");
+					setTimeout(function() {
+			          window.location.href = "/home";
+			         }, 4000);
+					
+				}				
+
+			})
+		}
+	}
+	
+	function fbSignInCallback(){
+		FB.getLoginStatus(function(response) {
+			
+			if (response.status === 'connected') {
+			    
+			    $.ajax({
+					type:'POST',
+					url:'/fconnect?state={{STATE}}',
+					processData:false,
+					contentType:'application/octet-stream;charset=utf-8',
+					data: response.authResponse.accessToken,
+					error: function(result){
+
+						$('#result').addClass('alert alert-danger');
+						$('#result').append("<h1>Ooops!! Sign in Failed</h1>"); 
+						$('#result').append("<ul><li>error : "+ result.status+"</li>"+
+							"<li>message : "+ result.responseText+"</li></ul></span>");
+						
+					},
+					success: function(result){
+						
+						$('#signinButton').attr('style', 'display:none');
+						$('#result').addClass("alert alert-success");
+						$('#result').append(result);
+						$('#result').append("redirecting...");
+						setTimeout(function() {
+				          window.location.href = "/home";
+				         }, 4000);
+						
+					}				
+
+			})
+			}
+		});
+	}
+</script>
+		</div>
+{% endblock %}
+			
