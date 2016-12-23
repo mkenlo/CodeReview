@@ -28,8 +28,13 @@ def addUser(username, email, password, social_id=''):
     session.commit()
 
 
-def editUser(user_id, name):
-    user = session.query(Users).get(user_id)
+def editUser(email, userinfo):
+    user = getUserByEmail(email)
+    if 'fullname' in userinfo:
+        user.fullname = userinfo['fullname']
+
+    session.add(user)
+    session.commit()
 
 
 def deleteAllUsers():
@@ -121,3 +126,7 @@ def editReview(review_id, comments, reviewer):
 
 def getCodeReview(review_id):
     return session.query(CodeReview).get(review_id)
+
+
+def getUserCodeToReview(user_id):
+    return session.query(CodeReview).filter_by(submitted_by=user_id).all()

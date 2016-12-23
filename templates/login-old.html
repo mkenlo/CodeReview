@@ -1,0 +1,83 @@
+{% extends "base.html" %} 
+
+{% block content %}
+<div class="row">
+	<br><br>
+	<div id="result" class="col-md-4">	</div>
+</div>
+<div class="row">
+	<div class="col-md-4">
+		<h2>Sign in</h2>
+		<form method="POST" action="{{url_for('login')}}">
+		  <div class="form-group">
+		    <label for="inputEmail">Email address</label>
+		    <input type="email" name="email" class="form-control" id="inputEmail" placeholder="Email">
+		  </div>
+		  <div class="form-group">
+		    <label for="inputPassword">Password</label>
+		    <input type="password" name="passwd" class="form-control" id="inputPassword" placeholder="Password">
+		  </div>
+		  
+		  <button type="submit" class="btn btn-default">Submit</button>
+		</form>
+	</div>
+	<div id="signinButton" class="col-md-4">
+		<h2>Sign in with Google</h2>
+		<br>
+		<div class="g-signin2" data-onsuccess="signInCallback"
+			data-scope="openid email"
+            data-clientid="99393343552-3hmud19ig349jqjs2peq7biv918qi9m0.apps.googleusercontent.com"
+            data-redirecturi="postmessage"
+            data-accesstype="offline"
+            data-cookiepolicy="single_host_origin"
+            data-callback="signInCallback"
+            data-approvalprompt="force">
+
+		</div>
+		
+	</div>
+	<div class="col-md-4">
+		<h2>Sign in with Facebook</h2>
+	</div>
+
+</div>
+
+
+
+			
+<script>
+	function signInCallback(authResult){
+	// console.log("AuthResult:  "+authResult['code']);
+	if(authResult['code']){
+		
+		$.ajax({
+			type:'POST',
+			url:'/gconnect?state={{STATE}}',
+			processData:false,
+			contentType:'application/octet-stream;charset=utf-8',
+			data: authResult['code'],
+			error: function(result){
+				$('#result').addClass('alert alert-danger');
+				$('#result').append("<h1>Ooops!! Sign in Failed</h1>"); 
+				$('#result').append("<ul><li>error : "+ result.status+"</li>"+
+					"<li>message : "+ result.responseText+"</li></ul></span>");
+				console.log(result);
+			},
+			success: function(result){
+				$('#signinButton').attr('style', 'display:none');
+				$('#result').addClass("alert alert-success");
+				$('#result').append(result);
+				$('#result').append("redirecting...");
+				setTimeout(function() {
+		          window.location.href = "/home";
+		         }, 4000);
+				
+			}
+			
+
+		})
+	}
+}
+</script>
+			
+{% endblock %}

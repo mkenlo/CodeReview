@@ -36,14 +36,13 @@ def login_required(f):
 @app.route('/code-review')
 @app.route('/home')
 def home():
-    return render_template('welcome.html')
+    return render_template('index.html')
 
 
 @app.route('/admin/')
 @app.route('/admin/dashboard')
 def dashboard():
     params = dict()
-    params['home'] = True
     if isLogged():
         params["username"] = login_session['username']
     params['problems'] = model.getAllProblems()
@@ -53,20 +52,31 @@ def dashboard():
 
 
 @app.route('/start')
+@login_required
 def start():
     params = dict()
-    params['home'] = True
     if isLogged():
         params["username"] = login_session['username']
     params['problems'] = model.getAllProblems()
     return render_template('start.html', **params)
 
 
+@app.route('/join')
+def join():
+    if isLogged():
+        flash("You are logged as %s" % login_session['username'], "success")
+        return redirect(url_for('start'))
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                    for x in xrange(32))
+    login_session['state'] = state
+    return render_template('login.html', STATE=state)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if isLogged():
         flash("You are logged as %s" % login_session['username'], "success")
-        return redirect(url_for('home'))
+        return redirect(url_for('start'))
 
     if request.method == "POST":
         user = model.getUserByEmail(request.form["email"])
@@ -76,7 +86,7 @@ def login():
             login_session['email'] = user.email
             login_session['access_token'] = True
 
-            return redirect(url_for('home'))
+            return redirect(url_for('start'))
         else:
             flash("Email or Password incorrect", "error")
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
@@ -90,10 +100,7 @@ def login():
 def signUp():
     if isLogged():
         flash("You are logged as %s" % login_session['username'], "success")
-        return redirect(url_for('home'))
-    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-                    for x in xrange(32))
-    login_session['state'] = state
+        return redirect(url_for('start'))
     if request.method == 'POST':
         error = False
         username = request.form["username"]
@@ -109,18 +116,20 @@ def signUp():
         if verif_passwd != passwd:
             error = True
             flash("Password verification failed", "error")
-
         if model.getUserByEmail(emailAdr):
             error = True
             flash("User Already exist", "warning")
 
         if error:
-            return redirect(url_for('signup'))
+            return redirect(url_for('signUp'))
 
         model.addUser(username, emailAdr, passwd)
         return redirect(url_for('login'))
 
     else:
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                        for x in xrange(32))
+        login_session['state'] = state
         return render_template('signup.html', STATE=state)
 
 
@@ -202,9 +211,9 @@ def gconnect():
     login_session['social'] = 'gplus'
 
     output = ''
-    output += '<h1>Welcome, '
+    output += 'Welcome, '
     output += login_session['username']
-    output += '!</h1>'
+    output += '!'
     # Register if new user
     if not model.getUserBySocialId(login_session['social_id'],
                                    login_session['username']):
@@ -262,9 +271,9 @@ def fconnect():
     login_session['social'] = 'fb'
 
     output = ''
-    output += '<h1>Welcome, '
+    output += 'Welcome, '
     output += login_session['username']
-    output += '!</h1>'
+    output += '!'
     # Register if new user
     if not model.getUserBySocialId(
             login_session['social_id'], login_session['username']):
@@ -280,11 +289,10 @@ def logout():
     access_token = login_session.get('access_token')
     if access_token is None:
         flash("User not connected.", "warning")
-        return redirect(url_for('home'))
+        return redirect(url_for('start'))
     h = httplib2.Http()
     result = dict()
     result['status'] = '200'
-    print "logout start"
     if "social" in login_session and login_session['social'] == 'gplus':
         url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
         result = h.request(url, 'GET')[0]
@@ -292,7 +300,7 @@ def logout():
     if result['status'] != '200':
         # For whatever reason, the given token was invalid.
         flash("Logout Error: Failed to revoke token for given user.", "danger")
-        return redirect(url_for('home'))
+        return redirect(url_for('start'))
     # Reset the user's session
     # del login_session['credentials']
     print "general logout"
@@ -304,7 +312,7 @@ def logout():
         del login_session['social_id']
     # del login_session['social']
     flash("You've logout Successfully", "success")
-    return redirect(url_for('home'))
+    return redirect(url_for('start'))
 
 
 @app.route('/problems')
@@ -327,7 +335,7 @@ def addProblem():
             model.addProblem(new_problem, login_session.get("email"))
         else:
             flash("Error!! Invalid input data", "danger")
-        return redirect(url_for('home'))
+        return redirect(url_for('start'))
     params = dict()
     params['categories'] = model.getCategories()
     params['languages'] = model.getLanguages()
@@ -353,8 +361,8 @@ def displayProblem(pb_id):
         params['languages'] = model.getLanguages()
     else:
         flash("Error!! Items not found", "danger")
-        return redirect(url_for('home'))
-    return render_template('oneproblem.html', **params)
+        return redirect(url_for('start'))
+    return render_template('problem.html', **params)
 
 
 @app.route('/problem/<int:pb_id>/submit-to-review/', methods=["POST"])
@@ -377,14 +385,40 @@ def attemptSolution(pb_id):
     return redirect(url_for('displayProblem', pb_id=pb_id))
 
 
-@app.route('/user/profile')
+@app.route('/profile/me')
 @login_required
 def userProfile():
-    return render_template("profile.html")
+    params = dict()
+    user = model.getUserByEmail(login_session['email'])
+    params['user'] = user
+    params['username'] = user.username
+    params['code_submitted'] = model.getUserCodeToReview(user.id)
+    return render_template("profile.html", **params)
 
-# @app.route('/problem/<int:pb_id>/review')
-# def reviewProblem(pb_ib):
-#     print "enable admin to review a code"
+
+@app.route('/profile/activities')
+@login_required
+def allReviews():
+    params = dict()
+    user = model.getUserByEmail(login_session['email'])
+    params['user'] = user
+    params['username'] = user.username
+    params['code_submitted'] = model.getUserCodeToReview(user.id)
+    return render_template("activity.html", **params)
+
+
+@app.route('/profile/edit', methods=['POST'])
+@login_required
+def editProfile():
+    if request.method == "POST":
+        print request.form['conditions']
+        if request.form['conditions'] == "on":
+            userinfo = {'fullname': request.form['fullname']}
+            # userinfo['location'] = request.form['location']
+            model.editUser(login_session['email'], userinfo)
+        else:
+            flash('Terms and Conditions field.', 'warning')
+    return redirect(url_for('userProfile'))
 
 
 @app.route('/review/code/<int:review_id>', methods=["GET", "POST"])
@@ -416,6 +450,7 @@ def isLogged():
     if login_session.get('access_token') is None:
         return False
     return True
+
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'

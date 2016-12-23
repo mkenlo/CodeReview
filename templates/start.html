@@ -21,7 +21,7 @@
       <!-- Your Page Content Here -->
       <div class="row">
       	{%for problem in problems %}
-			<div class="col-md-4">
+			<div class="col-md-4 col-sm-6">
 				<div class="box box-solid">
 					<div class="box-header"><a href='{{url_for("displayProblem", pb_id = problem.id)}}'>{{problem.title}}</a></div>
 					<div class="box-body">
