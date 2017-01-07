@@ -1,4 +1,4 @@
-from database_setup import Base, Users, Problem, Category, Language, Tags, CodeReview
+from database_setup import Base, Users, Problem, Category, Language, Tags, CodeReview, Comments
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import psycopg2
@@ -22,8 +22,7 @@ def addUser(username, email, password, social_id=''):
     password = utils.secure_password(password)
     newUser = Users(username=username,
                     email=email, password=password,
-                    social_id=social_id,
-                    joined_on=datetime.date.today())
+                    social_id=social_id)
     session.add(newUser)
     session.commit()
 
@@ -32,6 +31,12 @@ def editUser(email, userinfo):
     user = getUserByEmail(email)
     if 'fullname' in userinfo:
         user.fullname = userinfo['fullname']
+    if 'aboutme' in userinfo:
+        user.aboutme = userinfo['aboutme']
+    if 'location' in userinfo:
+        user.location = userinfo['location']
+    if 'skills' in userinfo:
+        user.skills = userinfo['skills']
 
     session.add(user)
     session.commit()
@@ -115,13 +120,10 @@ def addCodeToReview(code, language, problem_id, coder_id):
     session.commit()
 
 
-def editReview(review_id, comments, reviewer):
-    code_to_review = getCodeReview(review_id)
-    code_to_review.comments = comments
-    code_to_review.reviewed_by = reviewer
-    code_to_review.hasbeen_reviewed = True
-    session.add(code_to_review)
-    session.commit()
+# def editReview(review_id, comments, reviewer):
+#    code_to_review = getCodeReview(review_id)
+#    session.add(code_to_review)
+#    session.commit()
 
 
 def getCodeReview(review_id):
@@ -130,3 +132,20 @@ def getCodeReview(review_id):
 
 def getUserCodeToReview(user_id):
     return session.query(CodeReview).filter_by(submitted_by=user_id).all()
+
+
+def getComments(review_id):
+    return session.query(Comments).filter_by(review_id = review_id).all()
+
+
+def commentReview(review_id, comment, reviewer_email):
+    author = getUserByEmail(reviewer_email)
+    comment = Comments(message=comment,
+                       review_id=review_id,
+                       submitted_by=author.id)
+    code_to_review = getCodeReview(review_id)
+    if not code_to_review.is_reviewed:
+        code_to_review.is_reviewed = True
+        session.add(code_to_review)
+    session.add(comment)
+    session.commit()

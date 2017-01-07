@@ -6,10 +6,9 @@
   <title>Code Review - Welcome</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-
-
   <!-- Latest compiled and minified JavaScript -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  
   <!-- Bootstrap 3.3.6 -->
   <link rel="stylesheet" href="{{url_for('static', filename='bootstrap/css/bootstrap.min.css')}}">
   <!-- Font Awesome -->
@@ -21,6 +20,7 @@
 
   <link rel="stylesheet" href="{{url_for('static', filename='dist/css/skins/_all-skins.min.css')}}">
   <link rel="stylesheet" href="{{url_for('static', filename='dist/css/main.css')}}">
+  <link rel="shortcut icon" type="image/png" href="{{url_for('static',filename='dist/img/favicon.ico')}}"/>
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -38,7 +38,7 @@
     <nav class="navbar navbar-static-top">
     <div class="container">
       <div class="navbar-header">
-          <a href="{{url_for('home')}}" class="navbar-brand"><b>Code Review</b></a>
+          <a href="{{url_for('start')}}" class="navbar-brand"><b>Code Review</b></a>
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
             <i class="fa fa-bars"></i>
           </button>
@@ -64,22 +64,31 @@
   
    <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
+
     <div class="container">
       {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            <section class="box-msg">
+          <section class="box-msg">
+            <div class="row">
               <div class="col-md-6 col-md-offset-3 ">
               {% for category, message in messages %}
                 <div class="callout callout-{{ category }}">{{ message }}</div>
               {% endfor %}
               </div>
+              </div>
           </section>  
           {% endif %}
       {% endwith %}
+
+      
+
       {% block content %}
 
       {% endblock %}
+
     </div>
+
+      {% include "control-sidebar.html" %}
   </div>
 <!-- end of Content wrapper -->
 

@@ -88,7 +88,7 @@ def login():
 
             return redirect(url_for('start'))
         else:
-            flash("Email or Password incorrect", "error")
+            flash("Email or Password incorrect", "danger")
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in xrange(32))
     login_session['state'] = state
@@ -124,6 +124,8 @@ def signUp():
             return redirect(url_for('signUp'))
 
         model.addUser(username, emailAdr, passwd)
+        msg = "Welcome %s", str(username)
+        flash(msg, "success")
         return redirect(url_for('login'))
 
     else:
@@ -311,8 +313,7 @@ def logout():
     if "social_id" in login_session:
         del login_session['social_id']
     # del login_session['social']
-    flash("You've logout Successfully", "success")
-    return redirect(url_for('start'))
+    return redirect(url_for('login'))
 
 
 @app.route('/problems')
@@ -375,7 +376,7 @@ def attemptSolution(pb_id):
         user = model.getUserByEmail(login_session['email'])
         if request.form['action'] == "review_code":
             model.addCodeToReview(solution, language, pb_id, user.id)
-            print "send to review "
+            flash("You submitted your code for review", "success")
         if request.form['action'] == "save_code":
             model.editProblem(pb_id, solution, language)
             print "save my code"
@@ -414,8 +415,14 @@ def editProfile():
         print request.form['conditions']
         if request.form['conditions'] == "on":
             userinfo = {'fullname': request.form['fullname']}
-            # userinfo['location'] = request.form['location']
+            if request.form['experience']:
+                userinfo['aboutme'] = request.form['experience']
+            if request.form['location']:
+                userinfo['location'] = request.form['location']
+            if request.form['skills']:
+                userinfo['skills'] = request.form['skills']
             model.editUser(login_session['email'], userinfo)
+            flash("Profile infos saved","success")
         else:
             flash('Terms and Conditions field.', 'warning')
     return redirect(url_for('userProfile'))
@@ -424,17 +431,16 @@ def editProfile():
 @app.route('/review/code/<int:review_id>', methods=["GET", "POST"])
 @login_required
 def codeReview(review_id):
-    print "add some comments on a code"
     if request.method == "POST":
-        print " here is post method"
         if request.form['comments']:
-            model.editReview(review_id, request.form['comments'],
-                             request.form['reviewer'])
+            model.commentReview(review_id, request.form['comments'],
+                                login_session['email'])
             return redirect(url_for('codeReview', review_id=review_id))
     else:
         params = dict()
         params["username"] = login_session['username']
         params['codeToreview'] = model.getCodeReview(review_id)
+        params['comments'] = model.getComments(review_id)
         return render_template('codereview.html', **params)
 
 

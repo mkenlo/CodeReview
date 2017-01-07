@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Date, Text, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, DateTime, Text, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 import psycopg2
+import datetime
 
 Base = declarative_base()
 
@@ -15,8 +16,11 @@ class Users(Base):
     email = Column(String(250), nullable=False)
     password = Column(String(250), nullable=False)
     social_id = Column(String(250), nullable=True)
-    joined_on = Column(Date, nullable=False)
+    joined_on = Column(DateTime, default=datetime.datetime.now)
     user_level = Column(Integer)
+    aboutme = Column(Text)
+    location = Column(String(250))
+    skills = Column(Text)
 
 
 class Category(Base):
@@ -53,13 +57,22 @@ class CodeReview(Base):
     id = Column(Integer, primary_key=True)
     code = Column(Text, nullable=False)
     code_lang = Column(String(250), nullable=False)
-    comments = Column(Text, nullable=True)
     submitted_by = Column(ForeignKey('users.id'))
-    reviewed_by = Column(String(250))
     problem_id = Column(ForeignKey('problem.id'), nullable=False)
     problem = relationship(Problem)
     author = relationship(Users)
-    hasbeen_reviewed = Column(Boolean, default=False)
+    is_reviewed = Column(Boolean, default=False)
+
+
+class Comments(Base):
+    __tablename__ = 'comments'
+    id = Column(Integer, primary_key=True)
+    message = Column(Text, nullable=False)
+    submitted_by = Column(ForeignKey('users.id'))
+    author = relationship(Users)
+    review_id = Column(ForeignKey('codeReview.id'))
+    review = relationship(CodeReview)
+    posted = Column(DateTime, default=datetime.datetime.now)
 
 
 class Language(Base):

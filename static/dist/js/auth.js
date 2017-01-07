@@ -43,11 +43,8 @@ function gSignIn(STATE){
       });
     });
   });
-  
-   
+     
 }
-
-
 
 window.fbAsyncInit = function() {
     FB.init({
