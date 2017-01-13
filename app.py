@@ -126,6 +126,7 @@ def signUp():
         model.addUser(username, emailAdr, passwd)
         msg = "Welcome %s", str(username)
         flash(msg, "success")
+        utils.send_welcome(emailAdr)
         return redirect(url_for('login'))
 
     else:
@@ -222,6 +223,8 @@ def gconnect():
         model.addUser(login_session['username'], login_session[
                       'email'], "", login_session['social_id'])
 
+        utils.send_welcome(data['email'])
+
     return output
 
 
@@ -281,6 +284,8 @@ def fconnect():
             login_session['social_id'], login_session['username']):
         model.addUser(login_session['username'], login_session[
                       'email'], "", login_session['social_id'])
+
+        utils.send_welcome(fb_user['email'])
 
     return output
 
@@ -422,7 +427,7 @@ def editProfile():
             if request.form['skills']:
                 userinfo['skills'] = request.form['skills']
             model.editUser(login_session['email'], userinfo)
-            flash("Profile infos saved","success")
+            flash("Profile infos saved", "success")
         else:
             flash('Terms and Conditions field.', 'warning')
     return redirect(url_for('userProfile'))

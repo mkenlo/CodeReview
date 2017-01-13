@@ -69,8 +69,8 @@
                     <td>{{code.problem.title}}</td>
                     <td><span class="label label-success">{{code.code_lang}}</span></td>
                     <td>
-                    {% if code.hasbeen_reviewed  %}
-                    <span class="label label-success">reviewed</span>  </td>
+                    {% if code.is_reviewed  %}
+                    <span class="{{ loop.cycle('label label-success', 'label label-warning', 'label label-info') }}">reviewed</span>  </td>
                     {% else %}
                     <span class="label label-warning">pending</span>  
                     {% endif %}

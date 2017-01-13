@@ -22,7 +22,11 @@ def addUser(username, email, password, social_id=''):
     password = utils.secure_password(password)
     newUser = Users(username=username,
                     email=email, password=password,
-                    social_id=social_id)
+                    social_id=social_id,
+                    user_level=5)
+    # if first User Set him admin
+    if not getAllUsers():
+        newUser.user_level = 10
     session.add(newUser)
     session.commit()
 
