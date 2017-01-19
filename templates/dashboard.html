@@ -67,10 +67,10 @@
                   <tr>
                     <td><a href="{{url_for('codeReview', review_id=code.id)}}">CR{{code.id % 100}}</a></td>
                     <td>{{code.problem.title}}</td>
-                    <td><span class="label label-success">{{code.code_lang}}</span></td>
+                    <td><span class="label {{ loop.cycle('label-success', 'label-warning', 'label-info') }}">{{code.code_lang}}</span></td>
                     <td>
                     {% if code.is_reviewed  %}
-                    <span class="{{ loop.cycle('label label-success', 'label label-warning', 'label label-info') }}">reviewed</span>  </td>
+                    <span class="label label-success">reviewed</span>  </td>
                     {% else %}
                     <span class="label label-warning">pending</span>  
                     {% endif %}

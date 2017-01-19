@@ -24,7 +24,7 @@ def addUser(username, email, password, social_id=''):
                     email=email, password=password,
                     social_id=social_id,
                     user_level=5)
-    # if first User Set him admin
+    # if first User, Set him admin
     if not getAllUsers():
         newUser.user_level = 10
     session.add(newUser)

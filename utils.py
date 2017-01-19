@@ -42,9 +42,9 @@ def send_message(adrTo, subject, message):
 
 def send_welcome(adrTo):
     subject = "Welcome to CodeReview"
-    message = """Hello,<br>
+    message = """Hello,
 		Welcome to CodeReview! We are building a community of good coders.
 		Happy Coding!
-		<br>
+		
 		CodeReview Team"""
     send_message(adrTo, subject, message)

@@ -41,10 +41,10 @@ def home():
 
 @app.route('/admin/')
 @app.route('/admin/dashboard')
+@login_required
 def dashboard():
     params = dict()
-    if isLogged():
-        params["username"] = login_session['username']
+    params['me'] = login_session
     params['problems'] = model.getAllProblems()
     params['codeToreview'] = model.getAllReviews()
     params['users'] = len(model.getAllUsers())
@@ -55,8 +55,9 @@ def dashboard():
 @login_required
 def start():
     params = dict()
-    if isLogged():
-        params["username"] = login_session['username']
+    user = model.getUserByEmail(login_session['email'])
+    params['me'] = login_session
+    params['code_submitted'] = model.getUserCodeToReview(user.id)
     params['problems'] = model.getAllProblems()
     return render_template('start.html', **params)
 
@@ -271,7 +272,7 @@ def fconnect():
     login_session['social_id'] = fb_user['id']
     login_session['username'] = fb_user['name']
     login_session['picture'] = fb_user_pic[
-        'url'] if fb_user_pic['is_silhouette'] else "null"
+        'url'] if fb_user_pic['is_silhouette'] else "0"
     login_session['email'] = fb_user['email']
     login_session['social'] = 'fb'
 
@@ -345,7 +346,7 @@ def addProblem():
     params = dict()
     params['categories'] = model.getCategories()
     params['languages'] = model.getLanguages()
-    params['username'] = login_session['username']
+    params['me'] = login_session
     return render_template('addproblem.html', **params)
 
 
@@ -361,7 +362,7 @@ def displayProblem(pb_id):
     params = dict()
     problem = model.getProblemByID(int(pb_id))
     if isLogged():
-        params["username"] = login_session['username']
+        params['me'] = login_session
     if problem:
         params['problem'] = problem
         params['languages'] = model.getLanguages()
@@ -381,12 +382,16 @@ def attemptSolution(pb_id):
         user = model.getUserByEmail(login_session['email'])
         if request.form['action'] == "review_code":
             model.addCodeToReview(solution, language, pb_id, user.id)
-            flash("You submitted your code for review", "success")
+            msge = """ You submitted your code for review.
+            You will be notified when a comment will be made."""
+            flash(msge, "success")
+            return redirect(url_for('allReviews'))
         if request.form['action'] == "save_code":
             model.editProblem(pb_id, solution, language)
-            print "save my code"
+            # save my code
         if request.form['action'] == "run_code":
-            print "run code"
+            # run code
+            pass
 
     return redirect(url_for('displayProblem', pb_id=pb_id))
 
@@ -394,22 +399,21 @@ def attemptSolution(pb_id):
 @app.route('/profile/me')
 @login_required
 def userProfile():
-    params = dict()
-    user = model.getUserByEmail(login_session['email'])
-    params['user'] = user
-    params['username'] = user.username
-    params['code_submitted'] = model.getUserCodeToReview(user.id)
+    params=dict()
+    user=model.getUserByEmail(login_session['email'])
+    params['user']=user
+    params['me']=login_session
+    params['code_submitted']=model.getUserCodeToReview(user.id)
     return render_template("profile.html", **params)
 
 
 @app.route('/profile/activities')
 @login_required
 def allReviews():
-    params = dict()
-    user = model.getUserByEmail(login_session['email'])
-    params['user'] = user
-    params['username'] = user.username
-    params['code_submitted'] = model.getUserCodeToReview(user.id)
+    params=dict()
+    user=model.getUserByEmail(login_session['email'])
+    params['me']=login_session
+    params['code_submitted']=model.getUserCodeToReview(user.id)
     return render_template("activity.html", **params)
 
 
@@ -419,13 +423,13 @@ def editProfile():
     if request.method == "POST":
         print request.form['conditions']
         if request.form['conditions'] == "on":
-            userinfo = {'fullname': request.form['fullname']}
+            userinfo={'fullname': request.form['fullname']}
             if request.form['experience']:
-                userinfo['aboutme'] = request.form['experience']
+                userinfo['aboutme']=request.form['experience']
             if request.form['location']:
-                userinfo['location'] = request.form['location']
+                userinfo['location']=request.form['location']
             if request.form['skills']:
-                userinfo['skills'] = request.form['skills']
+                userinfo['skills']=request.form['skills']
             model.editUser(login_session['email'], userinfo)
             flash("Profile infos saved", "success")
         else:
@@ -442,18 +446,17 @@ def codeReview(review_id):
                                 login_session['email'])
             return redirect(url_for('codeReview', review_id=review_id))
     else:
-        params = dict()
-        params["username"] = login_session['username']
-        params['codeToreview'] = model.getCodeReview(review_id)
-        params['comments'] = model.getComments(review_id)
+        params=dict()
+        params['me']=login_session
+        params['codeToreview']=model.getCodeReview(review_id)
+        params['comments']=model.getComments(review_id)
         return render_template('codereview.html', **params)
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     if isLogged():
-        username = login_session['username']
-        return render_template("404.html", username=username)
+        return render_template("404.html", me=login_session)
     return render_template("404.html")
 
 
@@ -464,6 +467,6 @@ def isLogged():
 
 
 if __name__ == '__main__':
-    app.secret_key = 'super_secret_key'
-    app.debug = True
+    app.secret_key='super_secret_key'
+    app.debug=True
     app.run(host='0.0.0.0', port=5000)

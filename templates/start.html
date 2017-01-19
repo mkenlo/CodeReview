@@ -10,6 +10,16 @@
 </section>
 
 <!-- Main content -->
+{%if not code_submitted|length %}
+<section class="box-msg">
+  <div class="row">
+    <div class="col-md-9 col-md-offset-1 ">
+      <div class="callout callout-info">Get a free coding review NOW. Click <a href="" data-toggle="modal" data-target="#myPromotion"><strong>here</strong></a></div>
+    </div>
+    </div>
+</section> 
+{% endif %}
+
 <section class="content">
   <div class="row">
   {%for problem in problems %}
@@ -25,6 +35,27 @@
   {% endfor %}
   </div>
 </section>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="myPromotion">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-maroon color-palette">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">I want my free coding review</h4>
+      </div>
+      <div class="modal-body">
+        <p>Solve this challenge to gain your free review</p>
+        {% set random_problem = problems|random %}
+        <label>{{random_problem.title}}</label>
+        <p>{{random_problem.description}}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <a href="{{url_for('displayProblem', pb_id=random_problem.id)}}" class="btn bg-maroon">Yes I accept the challenge</a>
+      </div>
+    </div>
+  </div>
+</div><!-- /.modal -->
 <!-- /.content -->
 
 {% endblock %}
