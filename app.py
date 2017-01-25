@@ -1,5 +1,4 @@
-import model
-import utils
+import sys
 import random
 import string
 from flask import (
@@ -13,11 +12,14 @@ from oauth2client.client import FlowExchangeError
 import httplib2
 import json
 import requests
-
+sys.path.append("models")
+# sys.path.append("utils")
+from models import model
+from utils import *
 
 app = Flask(__name__)
 
-CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())[
+CLIENT_ID = json.loads(open('utils/client_secrets.json', 'r').read())[
     'web']['client_id']
 FB_APP_ID = "1136408746406465"
 FB_CLIENT_SECRET = "1a11045117bf18370f171600b2bbc436"
@@ -310,8 +312,6 @@ def logout():
         flash("Logout Error: Failed to revoke token for given user.", "danger")
         return redirect(url_for('start'))
     # Reset the user's session
-    # del login_session['credentials']
-    print "general logout"
     del login_session['access_token']
     del login_session['username']
     del login_session['email']
@@ -399,21 +399,21 @@ def attemptSolution(pb_id):
 @app.route('/profile/me')
 @login_required
 def userProfile():
-    params=dict()
-    user=model.getUserByEmail(login_session['email'])
-    params['user']=user
-    params['me']=login_session
-    params['code_submitted']=model.getUserCodeToReview(user.id)
+    params = dict()
+    user = model.getUserByEmail(login_session['email'])
+    params['user'] = user
+    params['me'] = login_session
+    params['code_submitted'] = model.getUserCodeToReview(user.id)
     return render_template("profile.html", **params)
 
 
 @app.route('/profile/activities')
 @login_required
 def allReviews():
-    params=dict()
-    user=model.getUserByEmail(login_session['email'])
-    params['me']=login_session
-    params['code_submitted']=model.getUserCodeToReview(user.id)
+    params = dict()
+    user = model.getUserByEmail(login_session['email'])
+    params['me'] = login_session
+    params['code_submitted'] = model.getUserCodeToReview(user.id)
     return render_template("activity.html", **params)
 
 
@@ -423,13 +423,13 @@ def editProfile():
     if request.method == "POST":
         print request.form['conditions']
         if request.form['conditions'] == "on":
-            userinfo={'fullname': request.form['fullname']}
+            userinfo = {'fullname': request.form['fullname']}
             if request.form['experience']:
-                userinfo['aboutme']=request.form['experience']
+                userinfo['aboutme'] = request.form['experience']
             if request.form['location']:
-                userinfo['location']=request.form['location']
+                userinfo['location'] = request.form['location']
             if request.form['skills']:
-                userinfo['skills']=request.form['skills']
+                userinfo['skills'] = request.form['skills']
             model.editUser(login_session['email'], userinfo)
             flash("Profile infos saved", "success")
         else:
@@ -446,10 +446,10 @@ def codeReview(review_id):
                                 login_session['email'])
             return redirect(url_for('codeReview', review_id=review_id))
     else:
-        params=dict()
-        params['me']=login_session
-        params['codeToreview']=model.getCodeReview(review_id)
-        params['comments']=model.getComments(review_id)
+        params = dict()
+        params['me'] = login_session
+        params['codeToreview'] = model.getCodeReview(review_id)
+        params['comments'] = model.getComments(review_id)
         return render_template('codereview.html', **params)
 
 
@@ -467,6 +467,6 @@ def isLogged():
 
 
 if __name__ == '__main__':
-    app.secret_key='super_secret_key'
-    app.debug=True
+    app.secret_key = 'super_secret_key'
+    app.debug = True
     app.run(host='0.0.0.0', port=5000)

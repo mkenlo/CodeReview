@@ -1,9 +1,7 @@
-from database_setup import Base, Users, Problem, Category, Language, Tags, CodeReview, Comments
+from database_setup import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import psycopg2
-import utils
-import datetime
+import utils.utils
 
 
 # connect with the database
@@ -124,12 +122,6 @@ def addCodeToReview(code, language, problem_id, coder_id):
     session.commit()
 
 
-# def editReview(review_id, comments, reviewer):
-#    code_to_review = getCodeReview(review_id)
-#    session.add(code_to_review)
-#    session.commit()
-
-
 def getCodeReview(review_id):
     return session.query(CodeReview).get(review_id)
 
@@ -139,7 +131,7 @@ def getUserCodeToReview(user_id):
 
 
 def getComments(review_id):
-    return session.query(Comments).filter_by(review_id = review_id).all()
+    return session.query(Comments).filter_by(review_id=review_id).all()
 
 
 def commentReview(review_id, comment, reviewer_email):

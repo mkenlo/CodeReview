@@ -35,7 +35,7 @@
         {%if me.picture %}
           <img src="{{me.picture}}" class="img-circle img-sm" alt="User Image">
           {% else %}
-          <img src="{{url_for('static', filename='dist/img/avatar.png')}}" class="img-circle" alt="User Image">
+          <img src="{{url_for('static', filename='dist/img/avatar.png')}}" class="img-circle img-sm" alt="User Image">
           {% endif %}
         <!-- hidden-xs hides the username on small devices so only the image appears. -->
         <span class="hidden-xs">{{me.username}}</span>
@@ -46,7 +46,7 @@
           {%if me.picture %}
           <img src="{{me.picture}}" class="img-circle" alt="User Image">
           {% else %}
-          <img src="{{url_for('static', filename='dist/img/avatar.png')}}" class="img-circle" alt="User Image">
+          <img src="{{url_for('static', filename='dist/img/avatar.png')}}" class="img-circle img-sm" alt="User Image">
           {% endif %}
           <p>
             {{me.username}}
