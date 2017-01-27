@@ -12,9 +12,11 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 session = DBSession()
-
+PER_PAGE = 2
 
 # CRUD functions for Users Table
+
+
 def addUser(username, email, password, social_id=''):
 
     password = utils.secure_password(password)
@@ -93,8 +95,15 @@ def editProblem(pb_id, solution, language):
     session.commit()
 
 
-def getAllProblems():
-    return session.query(Problem).all()
+def getAllProblems(total=False, offset=1):
+    query = session.query(Problem)
+    if total:
+        return query.count()
+    else:
+        query = query.limit(PER_PAGE)
+        if offset:
+            query = query.offset((PER_PAGE * offset) - PER_PAGE)
+    return query.all()
 
 
 def getProblemByID(pb_id):
@@ -126,8 +135,9 @@ def getCodeReview(review_id):
     return session.query(CodeReview).get(review_id)
 
 
-def getUserCodeToReview(user_id):
-    return session.query(CodeReview).filter_by(submitted_by=user_id).all()
+def getUserCodeToReview(user_id, count=False):
+    query = session.query(CodeReview).filter_by(submitted_by=user_id).all()
+    return len(query) if count else query
 
 
 def getComments(review_id):

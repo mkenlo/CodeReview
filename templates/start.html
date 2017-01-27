@@ -10,7 +10,7 @@
 </section>
 
 <!-- Main content -->
-{%if not code_submitted|length %}
+{%if not code_submitted %}
 <section class="box-msg">
   <div class="row">
     <div class="col-md-9 col-md-offset-1 ">
@@ -27,13 +27,39 @@
 		<div class="box box-solid">
 			<div class="box-header"><a href='{{url_for("displayProblem", pb_id = problem.id)}}'>{{problem.title}}</a></div>
 			<div class="box-body">
-			<div><button class="btn bg-purple">Strings</button> <button class="btn bg-purple">Arrays</button></div>
+			<div><span class="label label-info">{{problem.category.name}}</span></div>
 			</div>
 		</div> <!-- .box box-solid -->
 	</div>
 	
   {% endfor %}
   </div>
+  
+  <div class="row">
+	  <ul class="pagination pagination-sm no-margin pull-right">
+	  {% if pagination.has_prev %}
+	    <li><a href="/problems/page/{{pagination.page-1}}">&laquo;</a></li>
+	  {% endif %}	  
+	  {% for page in range(1,pagination.pages+1) %}
+	    {% if page %}
+	      {% if page != pagination.page %}
+	        <li><a href="/problems/page/{{page}}">{{ page }}</a></li>
+	      {% else %}
+	        <li><a class="bg-blue" ><strong>{{ page }}</strong></a></li>
+	      {% endif %}
+	    {% else %}
+	      <span class="ellipsis">…</span>
+	    {% endif %}
+	  {% endfor %}
+	  {% if pagination.has_next %}
+	    <li><a href="/problems/page/{{pagination.page+1}}">&raquo;</a></li>
+	  {% endif %}
+	  </ul>           
+  </div>
+ 
+  {% if problems|length() == 0 %}
+  <p> No problems found</p>
+  {% endif %}
 </section>
 
 <div class="modal fade" tabindex="-1" role="dialog" id="myPromotion">
@@ -45,7 +71,6 @@
       </div>
       <div class="modal-body">
         <p>Solve this challenge to gain your free review</p>
-        {% set random_problem = problems|random %}
         <label>{{random_problem.title}}</label>
         <p>{{random_problem.description}}</p>
       </div>

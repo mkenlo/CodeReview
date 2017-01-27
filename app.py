@@ -13,7 +13,7 @@ import httplib2
 import json
 import requests
 sys.path.append("models")
-# sys.path.append("utils")
+sys.path.append("utils")
 from models import model
 from utils import *
 
@@ -23,6 +23,7 @@ CLIENT_ID = json.loads(open('utils/client_secrets.json', 'r').read())[
     'web']['client_id']
 FB_APP_ID = "1136408746406465"
 FB_CLIENT_SECRET = "1a11045117bf18370f171600b2bbc436"
+PER_PAGE = 2
 
 
 def login_required(f):
@@ -53,14 +54,20 @@ def dashboard():
     return render_template('dashboard.html', **params)
 
 
-@app.route('/start')
+@app.route('/start', defaults={'offset': 1})
+@app.route('/problems/', defaults={'offset': 1})
+@app.route('/problems/page/<int:offset>')
 @login_required
-def start():
+def start(offset):
     params = dict()
+    count = model.getAllProblems(True)
     user = model.getUserByEmail(login_session['email'])
     params['me'] = login_session
-    params['code_submitted'] = model.getUserCodeToReview(user.id)
-    params['problems'] = model.getAllProblems()
+    params['code_submitted'] = model.getUserCodeToReview(user.id, True)
+    random_problem = random.randint(1, count)
+    params['random_problem'] = model.getProblemByID(random_problem)
+    params['pagination'] = utils.Pagination(offset, PER_PAGE, count)
+    params['problems'] = model.getAllProblems(False, offset)
     return render_template('start.html', **params)
 
 
@@ -322,11 +329,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/problems')
-def allproblems():
-    print "search all problems from db and print"
-
-
 @app.route('/problem/add', methods=['GET', 'POST'])
 @login_required
 def addProblem():
@@ -391,7 +393,7 @@ def attemptSolution(pb_id):
             # save my code
         if request.form['action'] == "run_code":
             # run code
-            pass
+            print "here run the code"
 
     return redirect(url_for('displayProblem', pb_id=pb_id))
 
@@ -466,7 +468,13 @@ def isLogged():
     return True
 
 
+def url_for_other_page(page):
+    args = request.view_args.copy()
+    args['page'] = page
+    return url_for(request.endpoint, **args)
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
+    app.jinja_env.globals['url_for_other_page'] = url_for_other_page
