@@ -38,7 +38,7 @@
         <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
           <ul class="nav navbar-nav navbar">
             <li class="active"><a href="{{url_for('start')}}">Catalog <span class="sr-only">(current)</span></a></li>
-            <li><a href="{{url_for('allReviews')}}">Reviews</a></li>
+            <li><a href="{{url_for('allReviews', offset=1)}}">Reviews</a></li>
           </ul>
           <form class="navbar-form navbar-left" role="search">
             <div class="form-group">

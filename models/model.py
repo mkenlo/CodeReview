@@ -12,7 +12,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 session = DBSession()
-PER_PAGE = 2
+PER_PAGE = 12
 
 # CRUD functions for Users Table
 
@@ -101,8 +101,7 @@ def getAllProblems(total=False, offset=1):
         return query.count()
     else:
         query = query.limit(PER_PAGE)
-        if offset:
-            query = query.offset((PER_PAGE * offset) - PER_PAGE)
+        query = query.offset((PER_PAGE * offset) - PER_PAGE)
     return query.all()
 
 
@@ -135,9 +134,13 @@ def getCodeReview(review_id):
     return session.query(CodeReview).get(review_id)
 
 
-def getUserCodeToReview(user_id, count=False):
-    query = session.query(CodeReview).filter_by(submitted_by=user_id).all()
-    return len(query) if count else query
+def getUserCodeToReview(user_id, count=False, offset=1):
+    query = session.query(CodeReview).filter_by(submitted_by=user_id)
+    if count:
+        return query.count()
+    else:
+        query = query.limit(PER_PAGE).offset((PER_PAGE * offset) - PER_PAGE)
+        return query
 
 
 def getComments(review_id):

@@ -73,8 +73,6 @@
       <a href="#" onclick="gSignIn('{{STATE}}')" class="btn btn-block btn-social btn-google btn-flat" ><i class="fa fa-google-plus"></i> Sign in using
         Google+</a>
     </div>
-    <!-- /.social-auth-links -->
-
     <a href="#">I forgot my password</a><br>
     <a href="{{url_for('signUp')}}" class="text-center">I don't have an account, register me</a>
 
@@ -83,19 +81,10 @@
 </div>
 <!-- /.login-box -->
 
-
-
-<!-- Google API -->
 <script src="https://apis.google.com/js/platform.js?onload=start" async defer> </script>
-
-<!-- jQuery 2.2.3 -->
 <script src="{{url_for('static', filename='plugins/jQuery/jquery-2.2.3.min.js')}}"></script>
-<!-- Bootstrap 3.3.6 -->
 <script src="{{url_for('static', filename='bootstrap/js/bootstrap.min.js')}}"></script>
-
 <script src="{{url_for('static',filename='dist/js/auth.js')}}"></script>
-
-<!-- iCheck -->
 <script src="{{url_for('static', filename='plugins/iCheck/icheck.min.js')}}"></script>
 <script>
   $(function () {

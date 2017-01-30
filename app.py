@@ -23,7 +23,7 @@ CLIENT_ID = json.loads(open('utils/client_secrets.json', 'r').read())[
     'web']['client_id']
 FB_APP_ID = "1136408746406465"
 FB_CLIENT_SECRET = "1a11045117bf18370f171600b2bbc436"
-PER_PAGE = 2
+PER_PAGE = 12
 
 
 def login_required(f):
@@ -409,13 +409,17 @@ def userProfile():
     return render_template("profile.html", **params)
 
 
-@app.route('/profile/activities')
+@app.route('/profile/activities', defaults={'offset': 1})
+@app.route('/profile/activities/page/<int:offset>', defaults={'offset': 1})
 @login_required
-def allReviews():
+def allReviews(offset):
     params = dict()
     user = model.getUserByEmail(login_session['email'])
+    count = model.getUserCodeToReview(user.id, True, 1)
     params['me'] = login_session
-    params['code_submitted'] = model.getUserCodeToReview(user.id)
+    params['code_submitted'] = model.getUserCodeToReview(
+        user.id, False, offset)
+    params['pagination'] = utils.Pagination(offset, PER_PAGE, count)
     return render_template("activity.html", **params)
 
 

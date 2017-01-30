@@ -45,13 +45,37 @@
       
       </tbody>
     </table>
-    </div>
+    </div><!-- .box box-solid -->
     
     
-	</div> <!-- .box box-solid -->
+	</div> 
 </div>	
-</div>
 
+<div class="row">
+    <ul class="pagination pagination-sm no-margin pull-right">
+    {% if pagination.has_prev %}
+      <li><a href="/profile/activities/page/{{pagination.page-1}}">&laquo;</a></li>
+    {% endif %}   
+    {% for page in range(1,pagination.pages+1) %}
+      {% if page %}
+        {% if page != pagination.page %}
+          <li><a href="/profile/activities/page/{{page}}">{{ page }}</a></li>
+        {% else %}
+          <li><a class="bg-blue" ><strong>{{ page }}</strong></a></li>
+        {% endif %}
+      {% else %}
+        <span class="ellipsis">…</span>
+      {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+      <li><a href="/profile/activities/page/{{pagination.page+1}}">&raquo;</a></li>
+    {% endif %}
+    </ul>           
+  </div>
+ 
+  {% if code_submitted|length() == 0 %}
+  <p> You haven't submitted yet </p>
+  {% endif %}
 
 </section>
 <!-- /.content -->
