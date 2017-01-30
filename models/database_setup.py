@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, Text, Boolean, ForeignKey
+from sqlalchemy import (Column, Integer,
+                        String, Date, DateTime, Text, Boolean, ForeignKey)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
@@ -62,6 +63,8 @@ class CodeReview(Base):
     problem = relationship(Problem)
     author = relationship(Users)
     is_reviewed = Column(Boolean, default=False)
+    submitted_on = Column(DateTime, default=datetime.datetime.now)
+    reviewed_on = Column(DateTime)
 
 
 class Comments(Base):
@@ -80,6 +83,7 @@ class Language(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     slug = Column(String(100))
+
 
 engine = create_engine(
     'postgresql://postgres:admin@localhost/codereview')
