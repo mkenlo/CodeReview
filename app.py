@@ -1,4 +1,5 @@
 import sys
+import os
 import random
 import string
 from flask import (
@@ -19,7 +20,11 @@ from utils import *
 
 app = Flask(__name__)
 
-CLIENT_ID = json.loads(open('utils/client_secrets.json', 'r').read())[
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+clt_secret_path = dir_path + '/utils/client_secrets.json'
+print clt_secret_path
+CLIENT_ID = json.loads(open(clt_secret_path, 'r').read())[
     'web']['client_id']
 FB_APP_ID = "1136408746406465"
 FB_CLIENT_SECRET = "1a11045117bf18370f171600b2bbc436"
@@ -478,7 +483,7 @@ def url_for_other_page(page):
     return url_for(request.endpoint, **args)
 
 if __name__ == '__main__':
-    app.secret_key = 'super_secret_key'
-    app.debug = True
-    app.run(host='0.0.0.0', port=5000)
+    app.secret_key = 'MKENLO_EVINDJ_2016!!!'
+    app.debug = False
     app.jinja_env.globals['url_for_other_page'] = url_for_other_page
+    app.run(host='127.0.0.1', port='8080')
