@@ -23,7 +23,6 @@ app = Flask(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 clt_secret_path = dir_path + os.path.normcase('/utils/client_secrets.json')
-print clt_secret_path
 CLIENT_ID = json.loads(open(clt_secret_path, 'r').read())[
     'web']['client_id']
 FB_APP_ID = "1136408746406465"

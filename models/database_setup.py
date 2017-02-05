@@ -3,7 +3,6 @@ from sqlalchemy import (Column, Integer,
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-import psycopg2
 import datetime
 
 Base = declarative_base()
