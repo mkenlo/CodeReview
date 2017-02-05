@@ -1,8 +1,6 @@
 from database_setup import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import utils.utils
-
 
 # connect with the database
 engine = create_engine(
@@ -19,7 +17,6 @@ PER_PAGE = 12
 
 def addUser(username, email, password, social_id=''):
 
-    password = utils.secure_password(password)
     newUser = Users(username=username,
                     email=email, password=password,
                     social_id=social_id,
@@ -140,7 +137,7 @@ def getUserCodeToReview(user_id, count=False, offset=1):
         return query.count()
     else:
         query = query.limit(PER_PAGE).offset((PER_PAGE * offset) - PER_PAGE)
-        return query
+        return query.all()
 
 
 def getComments(review_id):

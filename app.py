@@ -1,4 +1,5 @@
 import sys
+import os
 import random
 import string
 from flask import (
@@ -15,11 +16,15 @@ import requests
 sys.path.append("models")
 sys.path.append("utils")
 from models import model
-from utils import *
+from utils import utils
 
 app = Flask(__name__)
 
-CLIENT_ID = json.loads(open('utils/client_secrets.json', 'r').read())[
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+clt_secret_path = dir_path + os.path.normcase('/utils/client_secrets.json')
+print clt_secret_path
+CLIENT_ID = json.loads(open(clt_secret_path, 'r').read())[
     'web']['client_id']
 FB_APP_ID = "1136408746406465"
 FB_CLIENT_SECRET = "1a11045117bf18370f171600b2bbc436"
@@ -157,7 +162,7 @@ def gconnect():
     code = request.data
     try:
         # Upgrade the authorization code into a credentials object
-        oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
+        oauth_flow = flow_from_clientsecrets(clt_secret_path, scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
@@ -230,8 +235,9 @@ def gconnect():
     # Register if new user
     if not model.getUserBySocialId(login_session['social_id'],
                                    login_session['username']):
+        generate_pass = utils.secure_password("")
         model.addUser(login_session['username'], login_session[
-                      'email'], "", login_session['social_id'])
+                      'email'], generate_pass, login_session['social_id'])
 
         utils.send_welcome(data['email'])
 
@@ -292,8 +298,9 @@ def fconnect():
     # Register if new user
     if not model.getUserBySocialId(
             login_session['social_id'], login_session['username']):
+        generate_pass = utils.secure_password("")
         model.addUser(login_session['username'], login_session[
-                      'email'], "", login_session['social_id'])
+                      'email'], generate_pass, login_session['social_id'])
 
         utils.send_welcome(fb_user['email'])
 
@@ -480,5 +487,5 @@ def url_for_other_page(page):
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host='0.0.0.0', port=5000)
     app.jinja_env.globals['url_for_other_page'] = url_for_other_page
+    app.run(host='127.0.0.1', port=5000)
